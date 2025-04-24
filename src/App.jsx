@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { Sky, ContactShadows, RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
+import { Environment, Sky, ContactShadows, RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
 import { useRef } from 'react';
 import { Perf } from 'r3f-perf';
 import *as THREE from 'three'
@@ -24,6 +24,9 @@ function App() {
   const { sunPosition } = useControls('sky', {
     sunPosition: { value: [1, 2, 3] }
   })
+  const { envMapIntensity } = useControls('environment', {
+    envMapIntensity: { value: 1, min: 0, max: 12 },
+  });
 
 
   const boxeRef = useRef();
@@ -147,18 +150,62 @@ function App() {
   // we are not going to cover thise and only play with the position of the sun usin Leva
   //Call useControls, set the first parameter as 'sky' and send an object with a sunPosition proerty set to have a vector 3 tweak
   // use that value in the <sky>
-//but This is not the usual way of setting a sun position an dit, sberrer to use Spherical coordinates
-//create a Spherical
-//create a vector3
-//use its setFromSphrical method
-// to make the scene more realstic and logical we can use the sunPostion for the directionallight
+  //but This is not the usual way of setting a sun position an dit, sberrer to use Spherical coordinates
+  //create a Spherical
+  //create a vector3
+  //use its setFromSphrical method
+  // to make the scene more realstic and logical we can use the sunPostion for the directionallight
 
+
+  //Environment Map
+  //drei made the process esier with the enviromment helper
+  //we are going to use the enviromnent map to illuminate the Scene
+  //to prevent confilicts, we are going to commnt the current loghts and also the sky
+  // imposrt Environment from drei
+  //setup with cube texture
+  //first we are going to use the traditional cube textures that you can find in the /public/envirmntmape/ folder
+  //add the <Envirnent. to jsx and set its files attribute to contain an array of textures
+
+  //Intensity
+  //the default envMapIntensty is set to 1
+  //Call useControls set hte first parameter as environment map in order ot have a folder with that name and send an object  with a envMapIntensity  property that ranges between 0 and 12 (don't forgat to retrive the envMapIntensty)
+  //Use that value on every <meshStandardMatrial>
+  //Background
+  // if you want to see the environment map in the backgtound add a backround attribute
+  //cube map is bast above but we can use more realsitc 
+
+
+  //HDRI texture
+  // instead of using 6 images we can use one image covering the surrounding
+  // if you are looking for HDRI concept one of the best place is poly haven 
+  //download the hdr version and not exr
+  //try to keep the resolution as small as possible
+
+
+  //presets
+
+  
 
   return (
     <>
-      <Sky
-        sunPosition={sunPosition}
+
+      <Environment
+        background
+        files={
+          //   [
+          //   './environmentMaps/2/px.jpg',
+          //   './environmentMaps/2/nx.jpg',
+          //   './environmentMaps/2/py.jpg',
+          //   './environmentMaps/2/ny.jpg',
+          //   './environmentMaps/2/pz.jpg',
+          //   './environmentMaps/2/nz.jpg',
+          // ]
+          './environmentMaps/the_sky_is_on_fire_2k.hdr'
+        }
       />
+      {/* <Sky
+        sunPosition={sunPosition}
+      /> */}
       <ContactShadows
         position={[0, -0.99, 0]}
         scale={10}
@@ -170,12 +217,12 @@ function App() {
       // frames={1} if the scene is statice
 
       />
-      <BakeShadows />
+      {/* <BakeShadows /> */}
       {/* If your scene is appearing black, there are a few common reasons for this when using three.js and @react-three/fiber. Here are some steps to troubleshoot and fix the */}
 
-      <ambientLight intensity={2} /> {/* Add ambient light */}
+      {/* <ambientLight intensity={2} /> Add ambient light */}
 
-      <directionalLight
+      {/* <directionalLight
      
         position={sunPosition}
         intensity={1.5}
@@ -186,7 +233,7 @@ function App() {
       // shadow-camera-right={2}
       // shadow-camera-bottom={-2}
       // shadow-camera-left={2}
-      />{' '}
+      />{' '} */}
       {/* <AccumulativeShadows
         scale={10}
         position={[0, -1.499, 0]}
@@ -214,16 +261,16 @@ function App() {
       {/* <Perf /> */}
       <mesh position-x={-1.5} castShadow>
         <sphereGeometry />
-        <meshStandardMaterial color="green" />{' '}
+        <meshStandardMaterial color="green" envMapIntensity={envMapIntensity} />{' '}
         {/* Set a color for the material */}
       </mesh>
       <mesh position-x={1.5} ref={boxeRef} castShadow>
         <boxGeometry />
-        <meshStandardMaterial color="#ff0000" />
+        <meshStandardMaterial color="#ff0000" envMapIntensity={envMapIntensity} />
       </mesh>
       <mesh scale={10} rotation={[-Math.PI / 2, 0, 0]} position-y={-1.5} >
         <planeGeometry />
-        <meshStandardMaterial color="#808000" />
+        <meshStandardMaterial color="#808000" envMapIntensity={envMapIntensity} />
       </mesh>
 
     </>
