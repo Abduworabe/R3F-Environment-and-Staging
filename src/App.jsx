@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { Environment, Sky, ContactShadows, RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
+import { Stage, Lightformer, Environment, Sky, ContactShadows, RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper, Ring } from '@react-three/drei'; // Import from drei for easier usage
 import { useRef } from 'react';
 import { Perf } from 'r3f-perf';
 import *as THREE from 'three'
@@ -183,31 +183,89 @@ function App() {
 
 
   //presets
+  // Even better than having to download those HDRI, drei created presers that will take the files directly from poly haven
+  //Replce files by preset and choose on e among the following list 
+  // https://github.com//pmmndrs/drei/blob/master/src/helpers/environment-assets.ts
 
-  
+  //Custom environment
+  //We  would like to have red rectangle on one side to ensure there's red light illuminating out objects from this side 
+  //we can  position a <mesh> inside the <Environmt>
+  // First create the Mmesh> outside the <Environmint> to make sure it's well positoned
+  //then add it on the enviromnt 
+
+
+  // Adding lights to the environment map this way is a viable solutin , but three is a helper made for this purops named LightFormer.
+  //comment <mesh> insid the <Environment>
+
+  // import LightFormer from drei
+
+  //Add it to the <Environment> with the same position and Scale that we had on our <mesh>
+
+  // comment the resolution 
+
+
+  //Ground 
+  //when using an environment map as a background, we have the feeling that 
+  //objects are floating because the image is infinitley far
+  //By adding a ground Attribute, the projection of the envitonment map will make it look as if the floor underneath the objects is near
+  //Add the ground Attribut to <environment> with the folloewing parameters instead of the background attrbute
+  // ground={{
+
+  //That ground is considerd to be at the 0 elevation of the Scene, this means that in theory our object are inside the ground 
+  //fix it by moving them up a little with their position-y attribute
+
+  //Remove or comment the green floor plane and move the <contactShasows> up with its postion attribute
+
+  // Stage
+  //sometimes, we just want a default good looking setting with mininal configutation
+  //add this is what the Stage helper does
+  //stage will set an envitonment map , shadows, two directonal light and center the scene
+  //Comment everything in the jsx eccept for the <orbitcontrol> and <perf> 
+  //then dupliecate the spher <mesh> and cube
+
+  //import Stage from drei
+  // put mesh in to stage 
+
+  //Change the directional lights preset
 
   return (
     <>
 
-      <Environment
+      {/* <Environment
         background
+        ground={{
+          height:7, 
+          radius:28,
+          scale:100
+        }}
+       resolution={32}
         files={
-          //   [
-          //   './environmentMaps/2/px.jpg',
-          //   './environmentMaps/2/nx.jpg',
-          //   './environmentMaps/2/py.jpg',
-          //   './environmentMaps/2/ny.jpg',
-          //   './environmentMaps/2/pz.jpg',
-          //   './environmentMaps/2/nz.jpg',
-          // ]
+            [
+            './environmentMaps/2/px.jpg',
+            './environmentMaps/2/nx.jpg',
+            './environmentMaps/2/py.jpg',
+            './environmentMaps/2/ny.jpg',
+            './environmentMaps/2/pz.jpg',
+            './environmentMaps/2/nz.jpg',
+          ]
           './environmentMaps/the_sky_is_on_fire_2k.hdr'
         }
-      />
+
+
+      preset='surser' like this
+      >
+        <Lightformer position-z={-5}  form={Ring} scale={10} color="red" intensity={3}/>
+
+        <color args={['ivory']} attach={background}/>
+ 
+      </Environment> */}
+
+
       {/* <Sky
         sunPosition={sunPosition}
       /> */}
-      <ContactShadows
-        position={[0, -0.99, 0]}
+      {/* <ContactShadows
+        position={[0, 0, 0]}
         scale={10}
         resolution={512}
         color={color}
@@ -216,7 +274,8 @@ function App() {
         blur={blur}
       // frames={1} if the scene is statice
 
-      />
+      /> */}
+
       {/* <BakeShadows /> */}
       {/* If your scene is appearing black, there are a few common reasons for this when using three.js and @react-three/fiber. Here are some steps to troubleshoot and fix the */}
 
@@ -257,22 +316,41 @@ function App() {
       {/* </AccumulativeShadows> */}
       {/* Add point light */}
       <OrbitControls />
+
       <Perf position='top-left' />
       {/* <Perf /> */}
-      <mesh position-x={-1.5} castShadow>
+      {/* <mesh position-y={1} position-x={-1.5} castShadow>
         <sphereGeometry />
-        <meshStandardMaterial color="green" envMapIntensity={envMapIntensity} />{' '}
-        {/* Set a color for the material */}
-      </mesh>
-      <mesh position-x={1.5} ref={boxeRef} castShadow>
+        <meshStandardMaterial color="green" envMapIntensity={envMapIntensity} />
+        Set a color for the material 
+      </mesh> */}
+      {/* <mesh position-y={1}  position-x={1.5} ref={boxeRef} castShadow>
         <boxGeometry />
         <meshStandardMaterial color="#ff0000" envMapIntensity={envMapIntensity} />
-      </mesh>
-      <mesh scale={10} rotation={[-Math.PI / 2, 0, 0]} position-y={-1.5} >
+      </mesh> */}
+      {/* <mesh  scale={10} rotation={[-Math.PI / 2, 0, 0]} position-y={0} >
         <planeGeometry />
         <meshStandardMaterial color="#808000" envMapIntensity={envMapIntensity} />
-      </mesh>
-
+      </mesh> */}
+      <Stage
+        ContactShadows={{ opacity: 0.2, blur: 3 }}
+        // fiels={
+        //   './environmentMaps/the_sky_is_on_fire_2k.hdr'
+        // }
+        environment="sunset"
+        preset="portrait"
+        intensity={2}
+      >
+        <mesh position-y={1} position-x={-1.5} castShadow>
+          <sphereGeometry />
+          <meshStandardMaterial color="green" envMapIntensity={envMapIntensity} />
+          {/* Set a color for the material  */}
+        </mesh>
+        <mesh position-y={1} position-x={1.5} ref={boxeRef} castShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="#ff0000" envMapIntensity={envMapIntensity} />
+        </mesh>
+      </Stage>
     </>
   );
 }
