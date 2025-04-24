@@ -1,16 +1,17 @@
 import { useFrame } from '@react-three/fiber';
-import { SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
+import {RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
 import { useRef } from 'react';
 import { Perf } from 'r3f-perf';
 import *as THREE from 'three'
-SoftShadows({
-  frustum: 3.75,
-  size: 0.005,
-  near: 9.5,
-  samples: 17,
-  rings: 11
-})
 // npm install r3f-perf
+
+// SoftShadows({
+//   frustum: 3.75,
+//   size: 0.005,
+//   near: 9.5,
+//   samples: 17,
+//   rings: 11
+// })
 function App() {
   const boxeRef = useRef();
   const directionalLightRef = useRef();
@@ -61,11 +62,38 @@ function App() {
   //why it used? solution whan the boll bounce the near object shadow is bold the far is not just like this.
   // in app.js inport it from @react-three.drei
 
+  //next AccumlativeShadows will accumulate multiple shasow renders, and we are going to move the light randomly before each render 
+  // the AcculmlativeShasows can be renderd on a plane only
+  //Since the AccumlariveShasows will be a shasow on its own, we should deactivate theshasows on the <mesh> corresponding to the floor
+  // and comment or remove the SoftShasows();
+  // import it
+  //Add it to the scene right after the directionlLight and don't auto-close it 
+  // move it a little abouvve the floor
+  //then we need to provide lights to it
+  //Create a <directionlight> in the AcumulativeShasoes 
+  // use the same positon attribute as the dirctionalLight and add the Casrshsow atrubut
+
+
+
+  //The acshasow is doing a lot of shasow renders gut always from the sam dirctional light at teh ecaxt same positon 
+  //we nneed to move it randomlu on each frame
+  //we are going yo use the RandomizeLight
+  //impot it Randomixi
+
+  // add it to the AccoumulativeShasows instead of the directionlaLight and use the same positon atrubute
+  
+  // The RandomixedLight has multiple attributes to control the behaviour of the light
+  //amount ,radious, intensity, anbient
+  //Add parameteres related to the shasow map
+  //castShasow, mapSizw etc...
+  
   return (
     <>
       <BakeShadows />
       {/* If your scene is appearing black, there are a few common reasons for this when using three.js and @react-three/fiber. Here are some steps to troubleshoot and fix the */}
+
       <ambientLight intensity={2} /> {/* Add ambient light */}
+      
       <directionalLight
         position={[1, 2, 3]}
         intensity={1.5}
@@ -77,6 +105,13 @@ function App() {
       // shadow-camera-bottom={-2}
       // shadow-camera-left={2}
       />{' '}
+<AccumulativeShadows scale={10} position={[0, -1.499, 0]} rotation-x={Math.PI * 0.25}>
+        <RandomizedLight
+          position={[1, 2, 3]}
+          // castShadow
+
+        />
+      </AccumulativeShadows>
       {/* Add point light */}
       <OrbitControls />
       <Perf position='top-left' />
@@ -90,7 +125,7 @@ function App() {
         <boxGeometry />
         <meshStandardMaterial color="#ff0000" />
       </mesh>
-      <mesh scale={10} rotation-x={-Math.PI * 0.25} position-y={-1.5} receiveShadow>
+      <mesh scale={10} rotation-x={-Math.PI * 0.25} position-y={-1.5} >
         <planeGeometry />
         <meshStandardMaterial color="#808000" />
       </mesh>

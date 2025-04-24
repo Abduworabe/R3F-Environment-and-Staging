@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')).render(
     fov:45, 
     near:0.1,
     far:200,
-    position:[0,-1, 6]
+    position:[0,-1, 20]
     
   }}>
     <color args={['#b7ffc0']} attach="background"/>
