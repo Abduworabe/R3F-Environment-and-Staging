@@ -1,8 +1,9 @@
 import { useFrame } from '@react-three/fiber';
-import {RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
+import { Sky, ContactShadows, RandomizedLight, AccumulativeShadows, SoftShadows, BakeShadows, OrbitControls, useHelper } from '@react-three/drei'; // Import from drei for easier usage
 import { useRef } from 'react';
 import { Perf } from 'r3f-perf';
 import *as THREE from 'three'
+import { useControls } from 'leva';
 // npm install r3f-perf
 
 // SoftShadows({
@@ -13,16 +14,31 @@ import *as THREE from 'three'
 //   rings: 11
 // })
 function App() {
+
+  const { color, opacity, blur } = useControls('ContactShadows', {
+    color: '#9ae58a',
+    opacity: { value: 1, min: 0, max: 1 },
+    blur: { value: 3.5, min: 0, max: 10 },
+  })
+
+  const { sunPosition } = useControls('sky', {
+    sunPosition: { value: [1, 2, 3] }
+  })
+
+
   const boxeRef = useRef();
   const directionalLightRef = useRef();
 
   useHelper(directionalLightRef, THREE.DirectionalLightHelper, 1)
-  // This will run on every frame
+  // // This will run on every frame
 
   useFrame((state, delta) => {
     //   //1, we need to know hoe much time has passed sone the last frame
     //   //means delta time
+    const time = state.clock.elapsedTime
     boxeRef.current.rotation.y += delta;
+    // boxeRef.current.position.x=2+Math.sin(time)// 2 is starting of box or curnt inital postion 
+
     //   // groupRef.current.rotation.y += delta;
   });
   // Light
@@ -81,21 +97,87 @@ function App() {
   //impot it Randomixi
 
   // add it to the AccoumulativeShasows instead of the directionlaLight and use the same positon atrubute
-  
+
   // The RandomixedLight has multiple attributes to control the behaviour of the light
   //amount ,radious, intensity, anbient
   //Add parameteres related to the shasow map
   //castShasow, mapSizw etc...
-  
+
+
+  //We also have access to some attributes on the AccumulativeShasows  
+  //colors -the color of the shadow
+  //opacity-  the opacity of the shadow
+
+  //And tow more atttibutes  like frames-how many shadow renders to do
+  // temporal-spread teh renders across multiple frames
+  //1000
+  //The shasow looks smooth but Three.js had to do htose 100 renders on the first frame
+  // so We can prevent the freeze with temporal
+  // A weird shape is being drawn on the shadow if you move the camera,
+  // this is due to the directional light helper messing up with the shadow map
+  // Let's remove or comment the helper 
+  // Reduce the amount of frames to 100
+  // In the useFrame, retrieve the clock elapsedTime and assign it to a time  varible
+  // We specifically asked the AccumulativeShadows to render 100 frames only 
+  //the Solution is to tell the AccumulativeShadows to keep rendering the shadows with the frames attribute to infinity,
+  // finall we can use  static scene is use AccumulativeShadow but dinamic not use 
+  // comment the animation we added to the cube and put back the light helper
+
+  //ContactShadows
+  //this doesn't rely on the default shadow system of three.js 
+  //Deactivate Shadows on the Canvas
+  //Commment AccumulativeShadows
+
+  //contactShadows works without a light and omly on a plane
+  // import contactShadows from drei
+  //add anywhere in the hsx
+  //move it right above the floor
+  //we can improve the qualikty with resolution 
+  //We can shoose how far the shadow will render objects above with the far attribute
+  //This time, we are going to add the rest of the paramtersto Leva inorder to find the best settings
+  //install leva with npm install leva@learst
+  // Create the color , opacity and blur tweaks in a 'cotact Shadows' folder
+  //We can bake the shadow by setting the frames attribute on the contactShadow to 1
+
+  //#Sky
+  // R3F and drei make the task very easy with the sky hlper
+  // import it 
+  //Add it anywhere in the jsx
+  //This class is physice-based and tries to reproduce a realistic sky according to various parameters like mieCoefficient, mieDirectionalalG, rayleith and turbidity
+  // we are not going to cover thise and only play with the position of the sun usin Leva
+  //Call useControls, set the first parameter as 'sky' and send an object with a sunPosition proerty set to have a vector 3 tweak
+  // use that value in the <sky>
+//but This is not the usual way of setting a sun position an dit, sberrer to use Spherical coordinates
+//create a Spherical
+//create a vector3
+//use its setFromSphrical method
+// to make the scene more realstic and logical we can use the sunPostion for the directionallight
+
+
   return (
     <>
+      <Sky
+        sunPosition={sunPosition}
+      />
+      <ContactShadows
+        position={[0, -0.99, 0]}
+        scale={10}
+        resolution={512}
+        color={color}
+        far={5}
+        opacity={opacity}
+        blur={blur}
+      // frames={1} if the scene is statice
+
+      />
       <BakeShadows />
       {/* If your scene is appearing black, there are a few common reasons for this when using three.js and @react-three/fiber. Here are some steps to troubleshoot and fix the */}
 
       <ambientLight intensity={2} /> {/* Add ambient light */}
-      
+
       <directionalLight
-        position={[1, 2, 3]}
+     
+        position={sunPosition}
         intensity={1.5}
         ref={directionalLightRef}
         castShadow
@@ -105,13 +187,27 @@ function App() {
       // shadow-camera-bottom={-2}
       // shadow-camera-left={2}
       />{' '}
-<AccumulativeShadows scale={10} position={[0, -1.499, 0]} rotation-x={Math.PI * 0.25}>
+      {/* <AccumulativeShadows
+        scale={10}
+        position={[0, -1.499, 0]}
+        rotation-x={Math.PI * 0.25}
+        color='#316d69'
+        opacity={0.8}
+        frames={Infinity}
+        temporal
+        blend={100}
+      >
         <RandomizedLight
+          amount={8}
+          radius={1}
+          ambient={0.5}
+          intensity={2}
+          bias={0.001}
           position={[1, 2, 3]}
           // castShadow
-
-        />
-      </AccumulativeShadows>
+        
+        // /> */}
+      {/* </AccumulativeShadows> */}
       {/* Add point light */}
       <OrbitControls />
       <Perf position='top-left' />
@@ -125,7 +221,7 @@ function App() {
         <boxGeometry />
         <meshStandardMaterial color="#ff0000" />
       </mesh>
-      <mesh scale={10} rotation-x={-Math.PI * 0.25} position-y={-1.5} >
+      <mesh scale={10} rotation={[-Math.PI / 2, 0, 0]} position-y={-1.5} >
         <planeGeometry />
         <meshStandardMaterial color="#808000" />
       </mesh>
